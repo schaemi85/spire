@@ -1,0 +1,17 @@
+version: "2"
+
+linters:
+  default: standard
+  # default "standard" enables: errcheck, govet, ineffassign, staticcheck, unused
+
+  exclusions:
+    rules:
+      # Test setup (creating temp dirs/files, Chdir into t.TempDir) routinely
+      # ignores errors; errcheck there is noise, not a real defect.
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt

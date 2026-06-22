@@ -1,0 +1,31 @@
+{
+  "name": "Spire CLI",
+  "dockerComposeFile": "docker-compose.yml",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2.12.4": {}
+  },
+  "service": "dev",
+  "workspaceFolder": "/spire-cli",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.cwd": "/spire-cli"
+      },
+      "extensions": [
+        "golang.go",
+        "ms-azuretools.vscode-docker",
+        "EditorConfig.EditorConfig",
+        "ms-azuretools.vscode-containers",
+        "ms-vscode-remote.remote-containers",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "esbenp.prettier-vscode",
+        "DavidAnson.vscode-markdownlint",
+        "OpenTofu.vscode-opentofu",
+        "task.vscode-task"
+      ]
+    }
+  },
+  "postCreateCommand": "zsh /spire-cli/.devcontainer/setup.sh"
+}

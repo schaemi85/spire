@@ -1,0 +1,22 @@
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BASE_IMAGE=${BASE_IMAGE:-golang:1.26.4-bookworm}
+        - DEV_USER=${DEV_USER:-}
+        - REGISTRY_TOKEN=${REGISTRY_TOKEN:-}
+        - GOPROXY=${GOPROXY:-https://proxy.golang.org,direct}
+        - GONOSUMDB=${GONOSUMDB:-}
+        - GONOSUMCHECK=${GONOSUMCHECK:-}
+        - OLD_SPIRE_MODULE=${OLD_SPIRE_MODULE:-}
+        - OLD_SPIRE_VERSION=${OLD_SPIRE_VERSION:-}
+    env_file:
+        - .env
+    volumes:
+      - ..:/spire-cli:cached
+    environment:
+      - GOBIN=/go/bin
+    command: ["sleep", "infinity"]
