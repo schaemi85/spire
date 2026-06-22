@@ -1,4 +1,4 @@
-# Spire CLI
+# Spire
 
 ![Spire Gopher](docs/SpireGopher.png)
 
@@ -20,7 +20,7 @@ A Go-based scaffolding CLI that generates new applications from versioned templa
 
 ## Installation
 
-### macOS — Homebrew (recommended)
+### Homebrew
 
 ```bash
 brew install schaemi85/tap/spire
@@ -31,10 +31,7 @@ To upgrade later:
 ```bash
 brew upgrade spire
 ```
-
-> Homebrew distributes Spire as a **cask**, which is macOS-only. Linux users should use the install script below.
-
-### Linux — install script
+### Install script
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/schaemi85/spire/main/install.sh | sh
@@ -69,7 +66,7 @@ spire version
 ### Generate a project from a template
 
 ```bash
-spire init https://gitlab.example.com/templates/my-app-template
+spire init https://github.com/schaemi85/spire-template
 # or from a local directory
 spire init ./local-template
 ```
@@ -80,10 +77,14 @@ Spire prompts for each slot defined in the template manifest, renders all files,
 
 ```bash
 cd my-project
-spire add-service
+spire service add
 ```
 
-Copies the service blueprint from `templates/service/`, renders it with service-specific slot values, and registers it in the manifest.
+Copies the service blueprint defined by `serviceConfig.originalPath`, renders it with service-specific slot values, executes lifecycle plugins and registers it in the manifest. Supply values non-interactively with `--set Key=Value`:
+
+```bash
+spire service add --non-interactive --set ServiceName=payments --set WithDB=yes
+```
 
 ### Keep the project in sync with the template
 
@@ -95,7 +96,7 @@ spire upgrade --dry-run # preview changes first
 ### Push changes back to the template
 
 ```bash
-spire template-sync --output ../my-app-template
+spire template sync --output ../my-app-template
 ```
 
 Reverses resolved slot values back into `[[ ]]` expressions and produces a clean template ready to publish.
@@ -111,9 +112,9 @@ Template repo (versioned git tags)
         ▼
 Generated project (.spire/manifest.yaml)
         │
-        ├── spire add-service   → adds services/
+        ├── spire service add   → adds services/
         ├── spire upgrade       → pulls latest scaffolding
-        └── spire template-sync → pushes changes back to template
+        └── spire template sync → pushes changes back to template
 ```
 
 All behaviour is driven by `.spire/manifest.yaml`. Slots can be mandatory, optional, secret, or computed from expressions. Files containing `[[ ]]` are rendered as Go templates; everything else is copied verbatim.
@@ -181,8 +182,8 @@ ldflags, and publishes a **GitHub Release** with the archives and generated chan
 
 ```bash
 # Cut a release
-git tag v0.0.2
-git push origin v0.0.2
+git tag v0.0.1
+git push origin v0.0.1
 ```
 
 ### Local builds

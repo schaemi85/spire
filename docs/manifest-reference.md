@@ -252,6 +252,11 @@ application:
       - postgres/init-user-db.sh
       - .env
 
+  - path: infra/tofu/azure
+    keep:
+      - environments/**          # glob: every file under environments/
+      - "**/custom_*.tf"         # glob: any custom_*.tf at any depth
+
   - path: Makefile
 
 services:
@@ -261,8 +266,17 @@ services:
 | Field | Description |
 |-------|-------------|
 | `application[].path` | Directory or file to remove and replace from the new template |
-| `application[].keep` | Relative paths within the parent directory to back up and restore |
+| `application[].keep` | Paths within the parent directory to back up and restore. Each entry is relative to `path` and may be a literal path or a glob (see below) |
 | `services[].path` | Service directory to remove and replace |
+
+#### Glob patterns in `keep`
+
+`keep` entries support glob matching, not just literal paths:
+
+- `*`, `?`, `[...]` — standard [`filepath.Match`](https://pkg.go.dev/path/filepath#Match) wildcards within a single path segment.
+- `**` — matches zero or more directories (doublestar), e.g. `environments/**` keeps everything under `environments/`, and `**/custom_*.tf` keeps any `custom_*.tf` at any depth.
+
+Quote any entry containing `*` so YAML treats it as a string (e.g. `"**/custom_*.tf"`).
 
 ---
 

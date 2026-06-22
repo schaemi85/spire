@@ -148,9 +148,8 @@ sequenceDiagram
     CLI->>Renderer: RenderProjectFiles(service dir)
     CLI->>FS: ApplyPathRenames (service renames)
     CLI->>FS: Evaluate PostHooks (conditional removals)
-    CLI->>FS: go work use -r services/
-    CLI->>Renderer: Re-render templateFiles (regenerateOnServiceChange)
     CLI->>FS: Save updated manifest
+    CLI->>Renderer: Re-render templateFiles (regenerateOnServiceChange)
 
     CLI->>Plugins: RunHook(after-add-service, HookContext)
     Plugins->>FS: execute .spire/plugins/after-add-service/*
@@ -434,6 +433,7 @@ Pipeline functions available within templates:
 | `split` / `join` | String splitting/joining |
 | `contains` / `hasPrefix` / `hasSuffix` | Predicates |
 | `repeat` | Repeat string N times |
+| `trimSpace` | Strip leading/trailing whitespace |
 | `default` | Fallback value |
 | `generatePassword` | Random alphanumeric password; optional second arg `true` includes special characters |
 

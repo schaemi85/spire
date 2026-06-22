@@ -7,11 +7,11 @@ This directory contains all commands related to upgrading a Spire-based project 
 A typical upgrade workflow can be run as a sequence of commands (manually or in a script/task):
 
 ```bash
-# 1. Execute upgrate to the latest available template
+# 1. Upgrade to the latest available template
 spire upgrade [--dry-run]
 
-# 3. Proceed with the manual review of the upgrade and adjust as needed the code
-# 4. Commit & push changes
+# 2. Review the upgrade and adjust the code as needed
+# 3. Commit & push changes
 ```
 
 ## Upgrade process
@@ -129,10 +129,10 @@ formatting / lint config
 
 ### Users steps
 
-1. Upgrade Spire CLI: go install github.com/schaemi85/spire@v1.8.1
+1. Upgrade the Spire CLI (see the installation instructions in the root [readme](../../readme.md#installation))
 1. Proceed with CLI automated process
 1. Review manually and adjust as needed
 1. Tests : go mod tidy / go build
-1. Commit and push changes accross environments and proceed with all check
+1. Commit and push changes across environments and proceed with all checks
 
 To revert upgrade, just revert changes in git.

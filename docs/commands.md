@@ -1,5 +1,23 @@
 # Spire CLI — Command Reference
 
+## Command Overview
+
+Commands are grouped by lifecycle stage (as shown in `spire --help`):
+
+| Group | Command | Purpose |
+|-------|---------|---------|
+| **Project** | [`spire init`](#spire-init) | Generate a new project from a template |
+| **Project** | [`spire service add`](#spire-service) | Add a service to an existing project |
+| **Maintenance** | [`spire upgrade`](#spire-upgrade) | Pull the latest template scaffolding into the project |
+| **Maintenance** | [`spire backup`](#spire-backup) | Create, list, restore, and prune project backups |
+| **Template Authoring** | [`spire template sync`](#spire-template) | Reverse a project back into a reusable template |
+| **Template Authoring** | [`spire manifest`](#spire-manifest) | Scaffold and validate `.spire/manifest.yaml` |
+| **Plugins** | [`spire plugin`](#spire-plugin) | List, build, run, and debug lifecycle plugins |
+| — | [`spire version`](#spire-version) | Print the CLI version |
+| — | `spire completion <shell>` | Generate a shell completion script (bash/zsh/fish/powershell) |
+
+---
+
 ## Global Flags
 
 These flags are available on every command.
@@ -69,25 +87,32 @@ Add a new service to an existing Spire project using the service blueprint defin
 spire service add [flags]
 ```
 
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--set Key=Value` | Pre-fill a service slot value; repeatable (`--set A=1 --set B=2`) |
+
 ### Behaviour
 
-1. Validates the current directory is a Spire project (checks for `templates/service/`).
-2. Loads the manifest and prompts for each slot in `serviceConfig.servicesSlots`.
+1. Loads the manifest and validates the service blueprint directory (`serviceConfig.originalPath`) exists.
+2. Prompts for each slot in `serviceConfig.servicesSlots` (skipped for any value supplied via `--set`).
 3. Runs `before-add-service` plugins (see [plugins.md](plugins.md)).
-4. Copies `templates/service/` to `services/<service-name>/`.
+4. Copies `serviceConfig.originalPath` to `services/<service-name>/`.
 5. Renders files and applies service-level `pathRenames`.
 6. Evaluates `postHooks` — conditionally removes paths based on slot values.
-7. Runs `go work use -r services/` to register the new module.
+7. Records the new service in the manifest.
 8. Re-renders any `templateFiles` with `regenerateOnServiceChange: true`.
-9. Records the new service in the manifest.
-10. Runs `after-add-service` plugins.
+9. Runs `after-add-service` plugins.
+
+> Registering the new module in a Go workspace (`go work use`) is not done by Spire itself — wire it up as an `after-add-service` plugin if your template uses `go.work` (see the `update-go-workspace` entry in [plugins.md](plugins.md)).
 
 ### Examples
 
 ```bash
 spire service add
 
-# Non-interactive
+# Non-interactive — supply each required slot with --set
 spire service add --non-interactive --set ServiceName=payments --set WithDB=yes
 ```
 

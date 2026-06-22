@@ -44,7 +44,7 @@ Backstage-compatible templates from Spire.
 **1. Validation translation (easy).** The `validation` strings are already a near 1:1
 with JSON Schema. `minLength:2` → `minLength: 2`, `enum:yes,no` → `enum: [yes, no]`,
 `port` → `maximum: 65535, minimum: 1`, `slug`/`email`/`semver` → `pattern: <regex>`. A
-small lookup table covers all 18 rules.
+small lookup table covers all 14 rules.
 
 **2. Templating delimiter + filter rewrite (medium).** Every rendered file would need
 `[[ .slots.X ]]` → `${{ values.X }}` and `[[ .slots.X | slugify ]]` →

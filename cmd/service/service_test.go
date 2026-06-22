@@ -3,6 +3,7 @@ package service
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -191,6 +192,77 @@ func TestReadServicesConfigs(t *testing.T) {
 	}
 	if !result[0].WithDB || !result[0].WithAPI {
 		t.Errorf("service flags incorrect: %+v", result[0])
+	}
+}
+
+func TestAddServiceNonInteractiveWithSet(t *testing.T) {
+	origDir, _ := os.Getwd()
+	defer os.Chdir(origDir)
+
+	dir := t.TempDir()
+	os.Chdir(dir)
+
+	// Service blueprint: a directory with a file referencing the ServiceName slot.
+	blueprint := filepath.Join(dir, "services", "sampleservice")
+	os.MkdirAll(blueprint, 0755)
+	os.WriteFile(filepath.Join(blueprint, "main.go"),
+		[]byte("package main\n\n// service: [[ .slots.ServiceName ]]\n"), 0644)
+
+	// Minimal manifest with a single mandatory service slot.
+	manifestYAML := `spireVersion: v0.0.1
+templateVersion: v1.0.0
+serviceConfig:
+  originalPath: services/sampleservice
+  servicesSlots:
+    - key: ServiceName
+      label: Service Name
+      type: PromptMandatory
+`
+	os.MkdirAll(filepath.Join(dir, ".spire"), 0755)
+	if err := os.WriteFile(filepath.Join(dir, ".spire", "manifest.yaml"), []byte(manifestYAML), 0644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	// Non-interactive: the value must come from --set, not a prompt.
+	if err := AddService(true, []string{"ServiceName=payments"}); err != nil {
+		t.Fatalf("AddService() error: %v", err)
+	}
+
+	// The service directory should have been created and rendered.
+	rendered, err := os.ReadFile(filepath.Join(dir, "services", "payments", "main.go"))
+	if err != nil {
+		t.Fatalf("expected rendered service file: %v", err)
+	}
+	if got := string(rendered); !strings.Contains(got, "service: payments") {
+		t.Errorf("rendered file = %q, want it to contain %q", got, "service: payments")
+	}
+}
+
+func TestAddServiceNonInteractiveMissingSetFails(t *testing.T) {
+	origDir, _ := os.Getwd()
+	defer os.Chdir(origDir)
+
+	dir := t.TempDir()
+	os.Chdir(dir)
+
+	blueprint := filepath.Join(dir, "services", "sampleservice")
+	os.MkdirAll(blueprint, 0755)
+	os.WriteFile(filepath.Join(blueprint, "main.go"), []byte("package main\n"), 0644)
+
+	manifestYAML := `spireVersion: v0.0.1
+templateVersion: v1.0.0
+serviceConfig:
+  originalPath: services/sampleservice
+  servicesSlots:
+    - key: ServiceName
+      type: PromptMandatory
+`
+	os.MkdirAll(filepath.Join(dir, ".spire"), 0755)
+	os.WriteFile(filepath.Join(dir, ".spire", "manifest.yaml"), []byte(manifestYAML), 0644)
+
+	// No --set value for a mandatory slot in non-interactive mode must fail.
+	if err := AddService(true, nil); err == nil {
+		t.Error("expected error when a mandatory slot has no --set value in non-interactive mode")
 	}
 }
 

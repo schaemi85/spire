@@ -363,6 +363,7 @@ services:
 
 - Each `path` under `application` or `services` is removed and replaced from the new template.
 - Files listed under `keep` are backed up before the replacement and restored afterwards.
+- `keep` entries may be literal paths or globs — `*`/`?`/`[...]` within a segment, and `**` to match across directories (e.g. `environments/**`, `"**/custom_*.tf"`). See the [Manifest Reference](manifest-reference.md#glob-patterns-in-keep) for details.
 
 ---
 

@@ -16,7 +16,8 @@ import (
 )
 
 // AddService contains the main logic for adding a service. Extracted for testability.
-func AddService(nonInteractive bool) error {
+// setValues holds pre-seeded service slot values in "Key=Value" form (from --set flags).
+func AddService(nonInteractive bool, setValues []string) error {
 	m, err := manifest.LoadManifest()
 	if err != nil {
 		return err
@@ -32,6 +33,12 @@ func AddService(nonInteractive bool) error {
 	}
 
 	rc := engine.BuildResolveContextFromManifest(m)
+	for _, sv := range setValues {
+		parts := strings.SplitN(sv, "=", 2)
+		if len(parts) == 2 {
+			rc.Slots[parts[0]] = parts[1]
+		}
+	}
 
 	slotsClone := make([]manifest.Slot, len(m.ServiceConfig.ServicesSlots))
 	copy(slotsClone, m.ServiceConfig.ServicesSlots)
@@ -162,9 +169,14 @@ var AddCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		commoncmds.SwitchToWorkdir(cmd)
 		nint, _ := cmd.Root().Flags().GetBool("non-interactive")
-		if err := AddService(nint); err != nil {
+		setValues, _ := cmd.Flags().GetStringArray("set")
+		if err := AddService(nint, setValues); err != nil {
 			fmt.Printf("\n%v\n", err)
 			os.Exit(1)
 		}
 	},
+}
+
+func init() {
+	AddCmd.Flags().StringArray("set", nil, "Set service slot values (repeatable): --set Key=Value")
 }
